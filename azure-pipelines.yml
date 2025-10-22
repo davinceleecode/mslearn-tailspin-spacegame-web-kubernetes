@@ -51,7 +51,7 @@ stages:
               buildContext: $(Build.Repository.LocalPath)
               repository: $(leaderboardRepository)
               dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile"
-              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection .
               tags: |
                 $(tag)
 
@@ -105,7 +105,7 @@ stages:
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: "Container Registry Connection" # ✅ ACR or Docker Hub connection
               azureSubscriptionConnection: "Kubernetes Cluster Connection"
-              azureResourceGroup: "RG-DEVOPS-SEA" # ✅ 
+              azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
               namespace: "default"
 
