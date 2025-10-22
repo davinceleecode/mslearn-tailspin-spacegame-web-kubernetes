@@ -1,43 +1,132 @@
-trigger: none
+# -------------------------------
+# Trigger this pipeline on changes to the main branch
+# -------------------------------
+trigger:
+  - "main"
 
+# -------------------------------
+# Global variables used across pipeline
+# -------------------------------
 variables:
-  buildConfiguration: 'Release'
-  webRepository: 'web'
-  tag: '$(Build.BuildId)'
+  buildConfiguration: "Release"
+  leaderboardRepository: "leaderboard" # Docker repo name for leaderboard service
+  webRepository: "web" # Docker repo name for web app
+  tag: "$(Build.BuildId)" # Unique tag (build number)
+  imagePullSecret: "secret" # Secret name for Kubernetes to pull images
 
+# ======================================================
+# STAGE 1: BUILD
+# Build Docker images and push them to container registry
+# ======================================================
 stages:
-- stage: 'Build'
-  displayName: 'Build and push'
-  jobs:  
-  - job: 'Build'
-    displayName: 'Build job'
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:
-    - task: Docker@2
-      displayName: 'Build and push the image to container registry'
-      inputs:
-        command: buildAndPush
-        buildContext: $(Build.Repository.LocalPath)
-        repository: $(webRepository)
-        dockerfile: '$(Build.SourcesDirectory)/Tailspin.SpaceGame.Web/Dockerfile'
-        containerRegistry: 'Container Registry Connection'
-        tags: |
-          $(tag)
+  - stage: "Build"
+    displayName: "Build and push"
+    jobs:
+      - job: "Build"
+        displayName: "Build job"
+        pool:
+          vmImage: "ubuntu-20.04" # Run on Linux agent
+        steps:
+          # ---------------------------------------------
+          # Step 1: Build + push Web App Docker image
+          # ---------------------------------------------
+          - task: Docker@2
+            displayName: "Build and push the image to container registry"
+            inputs:
+              command: buildAndPush # Build and push in one command
+              buildContext: $(Build.Repository.LocalPath)
+              repository: $(webRepository)
+              dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.Web/Dockerfile"
+              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              tags: |
+                $(tag)
 
-- stage: 'Deploy'
-  displayName: 'Deploy the container'
-  dependsOn: Build
-  jobs:
-  - job: 'Deploy'
-    displayName: 'Deploy job'
-    pool:
-      vmImage: 'ubuntu-20.04'
-    variables:
-    - group: Release
-    steps:
-    - task: AzureWebAppContainer@1
-      inputs:
-       appName: $(WebAppName)
-       azureSubscription: 'Resource Manager - Tailspin - Space Game'
-       imageName: $(RegistryName)/$(webRepository):$(build.buildId)
+          # ---------------------------------------------
+          # Step 2: Build + push Leaderboard Docker image
+          # ---------------------------------------------
+          - task: Docker@2
+            displayName: "Build and push the leaderboard image to container registry"
+            inputs:
+              command: buildAndPush
+              buildContext: $(Build.Repository.LocalPath)
+              repository: $(leaderboardRepository)
+              dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile"
+              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              tags: |
+                $(tag)
+
+          # ---------------------------------------------
+          # Step 3: Publish Kubernetes YAML manifests as pipeline artifact
+          # ---------------------------------------------
+          - publish: "$(Build.SourcesDirectory)/manifests"
+            artifact: manifests
+
+  # ======================================================
+  # STAGE 2: DEPLOY
+  # Deploy built containers to Azure Web App + Kubernetes
+  # ======================================================
+  - stage: "Deploy"
+    displayName: "Deploy the container"
+    dependsOn: Build # Wait for Build stage to finish
+    jobs:
+      - job: "Deploy"
+        displayName: "Deploy job"
+        pool:
+          vmImage: "ubuntu-20.04"
+        environment: "Dev" # Marks this as the Dev environment
+        variables:
+          - group: Release # Variable group from Azure DevOps library
+
+        steps:
+          # ---------------------------------------------
+          # Step 1: Download manifests from previous stage
+          # ---------------------------------------------
+          - download: current
+            artifact: manifests
+
+          # ---------------------------------------------
+          # Step 2: Deploy the web app container to Azure Web App (App Service)
+          # ---------------------------------------------
+          - task: AzureWebAppContainer@1
+            inputs:
+              appName: $(WebAppName) # Web App name in Azure
+              azureSubscription: "Resource Manager - Tailspin - Space Game"
+              imageName: $(RegistryName)/$(webRepository):$(build.buildId)
+
+          # ---------------------------------------------
+          # Step 3: Create imagePullSecret in Kubernetes cluster
+          # This lets Kubernetes pull private images from ACR
+          # ---------------------------------------------
+          - task: KubernetesManifest@1
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              connectionType: azureResourceManager
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              azureSubscriptionConnection: "Kubernetes Cluster Connection"
+              azureResourceGroup: "RG-DEVOPS-SEA" # ✅ 
+              kubernetesCluster: "k8s-tailspin-dev" # ✅
+              namespace: "default"
+
+          # ---------------------------------------------
+          # Step 4: Deploy manifests (deployment.yml + service.yml) to Kubernetes
+          # Also specify which images and secrets to use
+          # ---------------------------------------------
+          - task: KubernetesManifest@1
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              connectionType: azureResourceManager
+              azureSubscriptionConnection: "Kubernetes Cluster Connection"
+              azureResourceGroup: "RG-DEVOPS-SEA" # ✅
+              kubernetesCluster: "k8s-tailspin-dev" # ✅
+              namespace: "default"
+              manifests: | # Deploy both Deployment and Service manifests
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              imagePullSecrets: | # Use the secret created above
+                $(imagePullSecret)
+              containers: | # Images with their tags
+                $(RegistryName)/$(webRepository):$(tag)
+                $(RegistryName)/$(leaderboardRepository):$(tag)
