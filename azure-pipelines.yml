@@ -101,7 +101,7 @@ stages:
               action: createSecret
               connectionType: azureResourceManager
               secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              dockerRegistryEndpoint: "7a996012-8a78-4acf-9895-be65cfe84a36" # ✅ ACR or Docker Hub connection
               azureSubscriptionConnection: "Kubernetes Cluster Connection"
               azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
