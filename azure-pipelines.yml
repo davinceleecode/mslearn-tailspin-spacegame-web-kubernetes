@@ -76,7 +76,6 @@ stages:
         environment: "dev" # Marks this as the Dev environment (ensure the environment exists)
         variables:
           - group: Release # Variable group from Azure DevOps library
-
         steps:
           # ---------------------------------------------
           # Step 1: Download manifests from previous stage
