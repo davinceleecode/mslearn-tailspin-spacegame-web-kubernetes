@@ -51,7 +51,7 @@ stages:
               buildContext: $(Build.Repository.LocalPath)
               repository: $(leaderboardRepository)
               dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile"
-              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection .
+              containerRegistry: "Container Registry Connection" # ✅ ACR or Docker Hub connection
               tags: |
                 $(tag)
 
@@ -73,7 +73,7 @@ stages:
         displayName: "Deploy job"
         pool:
           vmImage: "ubuntu-20.04"
-        environment: "dev" # Marks this as the Dev environment
+        environment: "dev" # Marks this as the Dev environment (ensure the environment exists)
         variables:
           - group: Release # Variable group from Azure DevOps library
 
