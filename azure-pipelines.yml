@@ -103,7 +103,7 @@ stages:
               connectionType: azureResourceManager # Use AzureRM service connection here
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: "Container Registry Connection" # ✅ ACR or Docker Hub connection
-              azureSubscriptionConnection: "AzureRM Connection" # Use the AzureRM connection (not Kubernetes connection)
+              azureSubscriptionConnection: "Resource Manager - Tailspin - Space Game" # Use the AzureRM connection (not Kubernetes connection)
               azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
               namespace: "default"
@@ -117,7 +117,7 @@ stages:
             inputs:
               action: deploy
               connectionType: azureResourceManager # Use AzureRM service connection here
-              azureSubscriptionConnection: "AzureRM Connection" # Use the AzureRM connection (not Kubernetes connection)
+              azureSubscriptionConnection: "Resource Manager - Tailspin - Space Game" # Use the AzureRM connection (not Kubernetes connection)
               azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
               namespace: "default"
