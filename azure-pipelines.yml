@@ -75,6 +75,7 @@ stages:
           vmImage: "ubuntu-20.04"
         variables:
           - group: Release # Variable group from Azure DevOps library
+
         steps:
           # ---------------------------------------------
           # Step 1: Download manifests from previous stage
@@ -99,10 +100,10 @@ stages:
             displayName: Create imagePullSecret
             inputs:
               action: createSecret
-              connectionType: azureResourceManager
+              connectionType: azureResourceManager # Use AzureRM service connection here
               secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: "7a996012-8a78-4acf-9895-be65cfe84a36" # ✅ ACR or Docker Hub connection
-              azureSubscriptionConnection: "Kubernetes Cluster Connection"
+              dockerRegistryEndpoint: "Container Registry Connection" # ✅ ACR or Docker Hub connection
+              azureSubscriptionConnection: "AzureRM Connection" # Use the AzureRM connection (not Kubernetes connection)
               azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
               namespace: "default"
@@ -115,8 +116,8 @@ stages:
             displayName: Deploy to Kubernetes cluster
             inputs:
               action: deploy
-              connectionType: azureResourceManager
-              azureSubscriptionConnection: "Kubernetes Cluster Connection"
+              connectionType: azureResourceManager # Use AzureRM service connection here
+              azureSubscriptionConnection: "AzureRM Connection" # Use the AzureRM connection (not Kubernetes connection)
               azureResourceGroup: "RG-DEVOPS-SEA" # ✅
               kubernetesCluster: "k8s-tailspin-dev" # ✅
               namespace: "default"
