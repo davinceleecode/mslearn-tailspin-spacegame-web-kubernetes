@@ -53,7 +53,7 @@ stages:
   # ---------------------------
   - stage: "Deploy"
     displayName: "Deploy to AKS"
-    # dependsOn: Build  # Uncomment if you want to explicitly specify dependencies
+    # dependsOn: Build
     jobs:
       - job: "DeployToK8s"
         displayName: "Deploy to AKS Cluster"
@@ -68,10 +68,9 @@ stages:
               # Unzip the kubelogin archive
               unzip kubelogin-linux-amd64.zip
 
-              # Check if the kubelogin binary exists in the correct directory after unzipping
+              # Check if kubelogin was unzipped correctly
               if [ -f "./bin/linux_amd64/kubelogin" ]; then
                 echo "kubelogin downloaded and unzipped successfully."
-                # Move kubelogin to the correct location
                 sudo mv ./bin/linux_amd64/kubelogin /usr/local/bin/
               else
                 echo "Error: kubelogin not found after unzip."
@@ -79,10 +78,16 @@ stages:
               fi
             displayName: "Install kubelogin for AAD authentication"
 
-          # Alternative: Install kubelogin using Azure CLI (fallback)
-          - script: |
-              az aks get-credentials --resource-group RG-FINALDEVOPS-SEA --name usecasefinaldevops --overwrite-existing
-            displayName: "Get AKS Credentials using Azure CLI"
+          # Authenticate Azure CLI using Service Principal
+          - task: AzureCLI@2
+            displayName: "Authenticate Azure CLI"
+            inputs:
+              azureSubscription: "Kubernetes Cluster Connection" # This is the service connection you configured for Azure
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                echo "Logged in to Azure using Service Principal"
+                az aks get-credentials --resource-group RG-FINALDEVOPS-SEA --name usecasefinaldevops --overwrite-existing
 
           # Download the published manifests (deployment & service files)
           - download: current
