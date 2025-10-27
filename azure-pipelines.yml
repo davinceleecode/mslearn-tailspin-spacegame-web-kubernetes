@@ -68,10 +68,11 @@ stages:
               # Unzip the kubelogin archive
               unzip kubelogin-linux-amd64.zip
 
-              # Check if kubelogin was unzipped correctly
-              if [ -f "./kubelogin" ]; then
+              # Check if the kubelogin binary exists in the correct directory after unzipping
+              if [ -f "./bin/linux_amd64/kubelogin" ]; then
                 echo "kubelogin downloaded and unzipped successfully."
-                sudo mv kubelogin /usr/local/bin/
+                # Move kubelogin to the correct location
+                sudo mv ./bin/linux_amd64/kubelogin /usr/local/bin/
               else
                 echo "Error: kubelogin not found after unzip."
                 exit 1
