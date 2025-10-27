@@ -60,6 +60,12 @@ stages:
         pool:
           vmImage: "ubuntu-latest"
         steps:
+          # Install kubelogin for AAD authentication
+          - script: |
+              curl -sSL https://aka.ms/get-kubelogin | bash
+              sudo mv kubelogin /usr/local/bin/
+            displayName: "Install kubelogin for AAD authentication"
+
           # Download the published manifests (deployment & service files)
           - download: current
             artifact: manifests
