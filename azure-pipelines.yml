@@ -12,48 +12,48 @@ stages:
   # ---------------------------
   # Build Stage
   # ---------------------------
-  - stage: "Build"
-    displayName: "Build Docker images"
-    jobs:
-      - job: "Build"
-        displayName: "Build Docker images"
-        pool:
-          vmImage: "ubuntu-latest"
-        steps:
-          # Build and Push Web App Docker Image
-          - task: Docker@2
-            displayName: "Build and push web image"
-            inputs:
-              command: buildAndPush
-              buildContext: $(Build.Repository.LocalPath)
-              repository: $(webRepository)
-              dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.Web/Dockerfile"
-              containerRegistry: "Container Registry Connection"
-              tags: |
-                $(tag)
+  # - stage: "Build"
+  #   displayName: "Build Docker images"
+  #   jobs:
+  #     - job: "Build"
+  #       displayName: "Build Docker images"
+  #       pool:
+  #         vmImage: "ubuntu-latest"
+  #       steps:
+  #         # Build and Push Web App Docker Image
+  #         - task: Docker@2
+  #           displayName: "Build and push web image"
+  #           inputs:
+  #             command: buildAndPush
+  #             buildContext: $(Build.Repository.LocalPath)
+  #             repository: $(webRepository)
+  #             dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.Web/Dockerfile"
+  #             containerRegistry: "Container Registry Connection"
+  #             tags: |
+  #               $(tag)
 
-          # Build and Push Leaderboard Docker Image
-          - task: Docker@2
-            displayName: "Build and push leaderboard image"
-            inputs:
-              command: buildAndPush
-              buildContext: $(Build.Repository.LocalPath)
-              repository: $(leaderboardRepository)
-              dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile"
-              containerRegistry: "Container Registry Connection"
-              tags: |
-                $(tag)
+  #         # Build and Push Leaderboard Docker Image
+  #         - task: Docker@2
+  #           displayName: "Build and push leaderboard image"
+  #           inputs:
+  #             command: buildAndPush
+  #             buildContext: $(Build.Repository.LocalPath)
+  #             repository: $(leaderboardRepository)
+  #             dockerfile: "$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile"
+  #             containerRegistry: "Container Registry Connection"
+  #             tags: |
+  #               $(tag)
 
-          # Publish the manifests artifact (for AKS deployment)
-          - publish: "$(Build.SourcesDirectory)/manifests"
-            artifact: manifests
+  #         # Publish the manifests artifact (for AKS deployment)
+  #         - publish: "$(Build.SourcesDirectory)/manifests"
+  #           artifact: manifests
 
   # ---------------------------
   # Deploy Stage (AKS Only)
   # ---------------------------
   - stage: "Deploy"
     displayName: "Deploy to AKS"
-    dependsOn: Build
+    # dependsOn: Build  # Uncomment if you want to explicitly specify dependencies
     jobs:
       - job: "DeployToK8s"
         displayName: "Deploy to AKS Cluster"
@@ -62,9 +62,20 @@ stages:
         steps:
           # Install kubelogin for AAD authentication
           - script: |
+              # Download kubelogin
               curl -LO https://github.com/Azure/kubelogin/releases/download/v0.0.21/kubelogin-linux-amd64.zip
+
+              # Unzip the kubelogin archive
               unzip kubelogin-linux-amd64.zip
-              sudo mv kubelogin /usr/local/bin/
+
+              # Check if kubelogin was unzipped correctly
+              if [ -f "./kubelogin" ]; then
+                echo "kubelogin downloaded and unzipped successfully."
+                sudo mv kubelogin /usr/local/bin/
+              else
+                echo "Error: kubelogin not found after unzip."
+                exit 1
+              fi
             displayName: "Install kubelogin for AAD authentication"
 
           # Alternative: Install kubelogin using Azure CLI (fallback)
