@@ -1,21 +1,21 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: leaderboard
+  name: leaderboard
 spec:
-    type: LoadBalancer
-    ports:
-    - port: 80 
-    selector:
-        app: leaderboard
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: leaderboard
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    name: web
+  name: web
 spec:
-    type: LoadBalancer
-    ports:
-    - port: 80 
-    selector:
-        app: web
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: web
