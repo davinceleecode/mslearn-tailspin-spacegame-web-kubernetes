@@ -62,9 +62,15 @@ stages:
         steps:
           # Install kubelogin for AAD authentication
           - script: |
-              curl -sSL https://aka.ms/get-kubelogin | sudo bash
+              curl -LO https://github.com/Azure/kubelogin/releases/download/v0.0.21/kubelogin-linux-amd64.zip
+              unzip kubelogin-linux-amd64.zip
               sudo mv kubelogin /usr/local/bin/
             displayName: "Install kubelogin for AAD authentication"
+
+          # Alternative: Install kubelogin using Azure CLI (fallback)
+          - script: |
+              az aks get-credentials --resource-group RG-FINALDEVOPS-SEA --name usecasefinaldevops --overwrite-existing
+            displayName: "Get AKS Credentials using Azure CLI"
 
           # Download the published manifests (deployment & service files)
           - download: current
