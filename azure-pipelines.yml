@@ -93,7 +93,7 @@ stages:
             inputs:
               action: deploy
               connectionType: kubernetes
-              kubernetesConnection: "Kubernetes Cluster Connection" # Kubernetes service connection
+              kubernetesServiceEndpoint: "Kubernetes Cluster Connection" # Kubernetes service connection
               kubernetesCluster: "aks-usecase-sea-003" # Your AKS cluster name
               namespace: "default"
               manifests: |
