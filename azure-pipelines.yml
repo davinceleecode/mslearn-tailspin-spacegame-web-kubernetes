@@ -104,7 +104,7 @@ stages:
               azureSubscriptionConnection: "Kubernetes Cluster Connection"
               azureSubscription: "Resource Manager - ClassicArmDemoAPI"
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "usecasefinaldevops"
+              kubernetesCluster: "aks-usecase-sea-003"
               namespace: "default"
 
           # Deploy Docker containers to AKS
@@ -115,7 +115,7 @@ stages:
               connectionType: azureResourceManager
               azureSubscriptionConnection: "Kubernetes Cluster Connection"
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "usecasefinaldevops"
+              kubernetesCluster: "aks-usecase-sea-003"
               namespace: "default"
               manifests: |
                 $(Pipeline.Workspace)/manifests/deployment.yml
