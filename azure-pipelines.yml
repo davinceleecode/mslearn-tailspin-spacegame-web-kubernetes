@@ -81,7 +81,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Authenticate Azure CLI"
             inputs:
-              azureSubscription: "AzureRM Service Connection" # Use AzureRM service connection
+              azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -99,11 +99,11 @@ stages:
               action: createSecret
               connectionType: azureResourceManager
               secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: "Container Registry Connection"
-              azureSubscriptionConnection: "AzureRM Service Connection" # Use AzureRM service connection
-              azureSubscription: "AzureRM Subscription Name" # Use your actual Azure subscription
+              dockerRegistryEndpoint: "Container Registry Connection" # Docker service connection
+              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
+              azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "usecasefinaldevops"
+              kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
               namespace: "default"
 
           # Deploy Docker containers to AKS
@@ -112,9 +112,9 @@ stages:
             inputs:
               action: deploy
               connectionType: azureResourceManager
-              azureSubscriptionConnection: "AzureRM Service Connection" # Use AzureRM service connection
+              azureSubscriptionConnection: "Kubernetes Cluster Connection" # Kubernetes service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "usecasefinaldevops"
+              kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
               namespace: "default"
               manifests: |
                 $(Pipeline.Workspace)/manifests/deployment.yml
