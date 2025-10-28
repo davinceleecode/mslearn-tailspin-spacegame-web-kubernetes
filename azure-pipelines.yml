@@ -100,7 +100,7 @@ stages:
               connectionType: azureResourceManager
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: "Container Registry Connection" # Docker service connection
-              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
+              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection (for managing resources like the secret)
               azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
               kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
@@ -112,7 +112,7 @@ stages:
             inputs:
               action: deploy
               connectionType: azureResourceManager
-              azureSubscriptionConnection: "Kubernetes Cluster Connection" # Kubernetes service connection
+              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection (to manage resources)
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
               kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
               namespace: "default"
