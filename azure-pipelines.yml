@@ -59,29 +59,11 @@ stages:
         pool:
           vmImage: "ubuntu-latest"
         steps:
-          # Install kubelogin for AAD authentication
-          - script: |
-              # Download kubelogin
-              curl -LO https://github.com/Azure/kubelogin/releases/download/v0.0.21/kubelogin-linux-amd64.zip
-
-              # Unzip the kubelogin archive
-              unzip kubelogin-linux-amd64.zip
-
-              # Check if kubelogin was unzipped correctly
-              if [ -f "./bin/linux_amd64/kubelogin" ]; then
-                echo "kubelogin downloaded and unzipped successfully."
-                sudo mv ./bin/linux_amd64/kubelogin /usr/local/bin/
-              else
-                echo "Error: kubelogin not found after unzip."
-                exit 1
-              fi
-            displayName: "Install kubelogin for AAD authentication"
-
           # Authenticate Azure CLI using Service Principal
           - task: AzureCLI@2
             displayName: "Authenticate Azure CLI"
             inputs:
-              azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
+              azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM Service Connection
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -100,8 +82,7 @@ stages:
               connectionType: azureResourceManager
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: "Container Registry Connection" # Docker service connection
-              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection (for managing resources like the secret)
-              azureSubscription: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
+              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
               kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
               namespace: "default"
@@ -112,7 +93,7 @@ stages:
             inputs:
               action: deploy
               connectionType: azureResourceManager
-              azureSubscriptionConnection: "Resource Manager - ClassicArmDemoAPI" # ARM service connection (to manage resources)
+              azureSubscriptionConnection: "Kubernetes Cluster Connection" # Kubernetes service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
               kubernetesCluster: "usecasefinaldevops" # Your AKS cluster name
               namespace: "default"
