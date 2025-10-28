@@ -53,7 +53,6 @@ stages:
   # ---------------------------
   - stage: "Deploy"
     displayName: "Deploy to AKS"
-    # dependsOn: Build
     jobs:
       - job: "DeployToK8s"
         displayName: "Deploy to AKS Cluster"
@@ -82,7 +81,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Authenticate Azure CLI"
             inputs:
-              azureSubscription: "Kubernetes Cluster Connection" # This is the service connection you configured for Azure
+              azureSubscription: "AzureRM Service Connection" # Use AzureRM service connection
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -101,10 +100,10 @@ stages:
               connectionType: azureResourceManager
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: "Container Registry Connection"
-              azureSubscriptionConnection: "Kubernetes Cluster Connection"
-              azureSubscription: "Resource Manager - ClassicArmDemoAPI"
+              azureSubscriptionConnection: "AzureRM Service Connection" # Use AzureRM service connection
+              azureSubscription: "AzureRM Subscription Name" # Use your actual Azure subscription
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "aks-usecase-sea-003"
+              kubernetesCluster: "usecasefinaldevops"
               namespace: "default"
 
           # Deploy Docker containers to AKS
@@ -113,9 +112,9 @@ stages:
             inputs:
               action: deploy
               connectionType: azureResourceManager
-              azureSubscriptionConnection: "Kubernetes Cluster Connection"
+              azureSubscriptionConnection: "AzureRM Service Connection" # Use AzureRM service connection
               azureResourceGroup: "RG-FINALDEVOPS-SEA"
-              kubernetesCluster: "aks-usecase-sea-003"
+              kubernetesCluster: "usecasefinaldevops"
               namespace: "default"
               manifests: |
                 $(Pipeline.Workspace)/manifests/deployment.yml
